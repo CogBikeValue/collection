@@ -62,7 +62,9 @@ async function loadBikes() {
         const grid = document.getElementById("bikeGrid");
         grid.innerHTML = "";
 
-        imageFiles.forEach(file => {
+        window.allBikeFiles = imageFiles;
+
+        renderBikes(imageFiles);
 
             const displayName = file.name
                 .replace(/\.[^/.]+$/, "")
@@ -86,7 +88,51 @@ async function loadBikes() {
         console.error(err);
     }
 }
+function renderBikes(files) {
 
+    const grid = document.getElementById("bikeGrid");
+    grid.innerHTML = "";
+
+    files.forEach(file => {
+
+        const displayName = file.name
+            .replace(/\.[^/.]+$/, "")
+            .replace(/[-_]/g, " ");
+
+        const card = document.createElement("div");
+        card.className = "bike-card";
+
+        card.innerHTML = `
+            <img src="${file.download_url}" alt="${displayName}">
+            <div class="bike-name">${displayName}</div>
+        `;
+
+        grid.appendChild(card);
+    });
+
+    if(files.length === 0){
+        grid.innerHTML = `
+            <div class="loading">
+                No bikes found.
+            </div>
+        `;
+    }
+}
+
+document.getElementById("searchInput")
+?.addEventListener("input", e => {
+
+    const search = e.target.value.toLowerCase();
+
+    const filtered = window.allBikeFiles.filter(file =>
+        file.name
+            .replace(/\.[^/.]+$/, "")
+            .toLowerCase()
+            .includes(search)
+    );
+
+    renderBikes(filtered);
+});
 loadBikes();
 </script>
 
