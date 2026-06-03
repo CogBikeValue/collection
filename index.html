@@ -1,1 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<title>Bike Collection</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="background"></div>
+
+<div class="container">
+
+    <div class="hero">
+        <h1>Bike Collection</h1>
+        <p class="subtitle">Automatically synced from GitHub</p>
+    </div>
+
+    <div id="bikeGrid" class="bike-grid">
+        <div class="loading">Loading bikes...</div>
+    </div>
+
+</div>
+
+<script>
+const owner = "CogBikeValue";
+const repo = "collection";
+const folder = "images";
+
+const api =
+`https://api.github.com/repos/${owner}/${repo}/contents/${folder}`;
+
+async function loadBikes() {
+    try {
+        const response = await fetch(api);
+        const files = await response.json();
+
+        const imageFiles = files.filter(file =>
+            /\.(png|jpg|jpeg|webp|gif)$/i.test(file.name)
+        );
+
+        imageFiles.sort((a,b)=>
+            a.name.localeCompare(b.name)
+        );
+
+        const grid = document.getElementById("bikeGrid");
+        grid.innerHTML = "";
+
+        imageFiles.forEach(file => {
+
+            const displayName = file.name
+                .replace(/\.[^/.]+$/, "")
+                .replace(/[-_]/g," ");
+
+            const card = document.createElement("div");
+            card.className = "bike-card";
+
+            card.innerHTML = `
+                <img src="${file.download_url}" alt="${displayName}">
+                <div class="bike-name">${displayName}</div>
+            `;
+
+            grid.appendChild(card);
+        });
+
+    } catch (err) {
+        document.getElementById("bikeGrid").innerHTML =
+            `<div class="loading">Failed to load bikes.</div>`;
+
+        console.error(err);
+    }
+}
+
+loadBikes();
+</script>
+
+</body>
+</html>
