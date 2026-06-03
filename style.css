@@ -124,25 +124,23 @@ h1{
 }
 
 .search-container{
-    display:flex;
-    justify-content:center;
+    width:100%;
     margin-top:20px;
 }
 
 #searchInput{
     width:100%;
-    max-width:500px;
 
     padding:14px 18px;
+
+    color:white;
+    font-size:15px;
 
     background:rgba(255,255,255,.08);
     backdrop-filter:blur(10px);
 
     border:1px solid rgba(255,255,255,.1);
     border-radius:14px;
-
-    color:white;
-    font-size:15px;
 
     outline:none;
 
