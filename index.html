@@ -1,12 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Bike Collection</title>
-<link rel="stylesheet" href="style.css">
-<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>COG Bike Collection</title>
@@ -20,17 +14,17 @@
 <div class="container">
 
     <div class="hero">
-    <h1>Bike Collection</h1>
-    <p class="subtitle"></p>
+        <h1>Bike Collection</h1>
+        <p class="subtitle">Browse all available bikes</p>
 
-    <div class="search-container">
-        <input
-            type="text"
-            id="searchInput"
-            placeholder="🔍 Search bikes..."
-        >
+        <div class="search-container">
+            <input
+                type="text"
+                id="searchInput"
+                placeholder="🔍 Search bikes..."
+            >
+        </div>
     </div>
-</div>
 
     <div id="bikeGrid" class="bike-grid">
         <div class="loading">Loading bikes...</div>
@@ -44,53 +38,48 @@ const repo = "collection";
 const folder = "images";
 
 const api =
-`https://api.github.com/repos/${owner}/${repo}/contents/${folder}`;
+    `https://api.github.com/repos/${owner}/${repo}/contents/${folder}`;
+
+window.allBikeFiles = [];
 
 async function loadBikes() {
     try {
         const response = await fetch(api);
+
+        if (!response.ok) {
+            throw new Error("Failed to fetch GitHub files");
+        }
+
         const files = await response.json();
 
         const imageFiles = files.filter(file =>
             /\.(png|jpg|jpeg|webp|gif)$/i.test(file.name)
         );
 
-        imageFiles.sort((a,b)=>
+        imageFiles.sort((a, b) =>
             a.name.localeCompare(b.name)
         );
-
-        const grid = document.getElementById("bikeGrid");
-        grid.innerHTML = "";
 
         window.allBikeFiles = imageFiles;
 
         renderBikes(imageFiles);
 
-            const displayName = file.name
-                .replace(/\.[^/.]+$/, "")
-                .replace(/[-_]/g," ");
-
-            const card = document.createElement("div");
-            card.className = "bike-card";
-
-            card.innerHTML = `
-                <img src="${file.download_url}" alt="${displayName}">
-                <div class="bike-name">${displayName}</div>
-            `;
-
-            grid.appendChild(card);
-        });
-
     } catch (err) {
-        document.getElementById("bikeGrid").innerHTML =
-            `<div class="loading">Failed to load bikes.</div>`;
+
+        document.getElementById("bikeGrid").innerHTML = `
+            <div class="loading">
+                Failed to load bikes.
+            </div>
+        `;
 
         console.error(err);
     }
 }
+
 function renderBikes(files) {
 
     const grid = document.getElementById("bikeGrid");
+
     grid.innerHTML = "";
 
     files.forEach(file => {
@@ -110,7 +99,7 @@ function renderBikes(files) {
         grid.appendChild(card);
     });
 
-    if(files.length === 0){
+    if (files.length === 0) {
         grid.innerHTML = `
             <div class="loading">
                 No bikes found.
@@ -119,21 +108,30 @@ function renderBikes(files) {
     }
 }
 
-document.getElementById("searchInput")
-?.addEventListener("input", e => {
+document.addEventListener("DOMContentLoaded", () => {
 
-    const search = e.target.value.toLowerCase();
+    const searchInput = document.getElementById("searchInput");
 
-    const filtered = window.allBikeFiles.filter(file =>
-        file.name
-            .replace(/\.[^/.]+$/, "")
-            .toLowerCase()
-            .includes(search)
-    );
+    searchInput.addEventListener("input", () => {
 
-    renderBikes(filtered);
+        const search = searchInput.value
+            .trim()
+            .toLowerCase();
+
+        const filtered = window.allBikeFiles.filter(file => {
+
+            const bikeName = file.name
+                .replace(/\.[^/.]+$/, "")
+                .toLowerCase();
+
+            return bikeName.includes(search);
+        });
+
+        renderBikes(filtered);
+    });
+
+    loadBikes();
 });
-loadBikes();
 </script>
 
 </body>
