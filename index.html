@@ -24,6 +24,11 @@
 
     <link rel="stylesheet" href="style.css">
 </head>
+		
+<div id="imageViewer" class="image-viewer">
+    <img id="fullImage" src="" alt="">
+</div>
+	
 <body>
 
 <div class="background"></div>
@@ -112,10 +117,23 @@ function renderBikes(files) {
             <img src="${file.download_url}" alt="${displayName}">
             <div class="bike-name">${displayName}</div>
         `;
-
         grid.appendChild(card);
     });
 
+	const img = card.querySelector("img");
+
+	img.addEventListener("click", (event) => {
+    event.stopPropagation();
+
+    const viewer = document.getElementById("imageViewer");
+    const fullImage = document.getElementById("fullImage");
+
+    fullImage.src = img.src;
+    fullImage.alt = img.alt;
+
+    viewer.classList.add("active");
+});
+	
     if (files.length === 0) {
         grid.innerHTML = `
             <div class="loading">
@@ -124,6 +142,12 @@ function renderBikes(files) {
         `;
     }
 }
+
+const imageViewer = document.getElementById("imageViewer");
+
+imageViewer.addEventListener("click", () => {
+    imageViewer.classList.remove("active");
+});
 
 document.addEventListener("DOMContentLoaded", () => {
 
