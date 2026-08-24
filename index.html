@@ -114,15 +114,13 @@ function renderBikes(files) {
         card.className = "bike-card";
 
         card.innerHTML = `
-            <img src="${file.download_url}" alt="${displayName}">
-            <div class="bike-name">${displayName}</div>
-        `;
-        grid.appendChild(card);
-    });
+    <img src="${file.download_url}" alt="${displayName}">
+    <div class="bike-name">${displayName}</div>
+`;
 
-	const img = card.querySelector("img");
+const img = card.querySelector("img");
 
-	img.addEventListener("click", (event) => {
+img.addEventListener("click", (event) => {
     event.stopPropagation();
 
     const viewer = document.getElementById("imageViewer");
@@ -133,6 +131,11 @@ function renderBikes(files) {
 
     viewer.classList.add("active");
 });
+
+grid.appendChild(card);
+    });
+
+	
 	
     if (files.length === 0) {
         grid.innerHTML = `
