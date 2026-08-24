@@ -1,182 +1,304 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Bike Value List</title>
-	<meta name="description" content="Search for the looks of a bike.">
-	<meta property="og:type" content="website">
-	<meta property="og:url" content="https://cogbikevalue.github.io/collection/">
-	<meta property="og:title" content="OFFICIAL Cog Bike Collection">
-	<meta property="og:description" content="Search for the looks of a bike.">
-	<meta property="og:image" content="https://cogbikevalue.github.io/bikes/images/background.png">
-	<meta property="og:image:width" content="1200">
-	<meta property="og:image:height" content="630">
-	<meta name="twitter:card" content="summary_large_image">
-	<meta name="twitter:title" content="OFFICIAL Cog Bike Collection">
-	<meta name="twitter:description" content="Search for the looks of a bike.">
-	<meta name="twitter:image" content="https://cogbikevalue.github.io/bikes/images/background.png">
-	<link rel="stylesheet" href="style.css">
-	<link rel="icon" type="image/png" href="https://cogbikevalue.github.io/bikes/images/favicon.png">
-        
-    <head>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>COG Bike Collection</title>
 
+    <meta name="description" content="Search for the looks of a bike.">
+
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://cogbikevalue.github.io/collection/">
+    <meta property="og:title" content="OFFICIAL Cog Bike Collection">
+    <meta property="og:description" content="Search for the looks of a bike.">
+    <meta property="og:image" content="https://cogbikevalue.github.io/bikes/images/background.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="OFFICIAL Cog Bike Collection">
+    <meta name="twitter:description" content="Search for the looks of a bike.">
+    <meta name="twitter:image" content="https://cogbikevalue.github.io/bikes/images/background.png">
+
     <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/png" href="https://cogbikevalue.github.io/bikes/images/favicon.png">
 </head>
-		
-<div id="imageViewer" class="image-viewer">
-    <img id="fullImage" src="" alt="">
-</div>
-	
+
 <body>
 
-<div class="background"></div>
+    <div class="background"></div>
 
-<div class="container">
+    <div class="container">
 
-    <div class="hero">
-        <h1>Bike Collection</h1>
-        <p class="subtitle">Browse all available bikes</p>
+        <div class="hero">
 
-        <div class="search-container">
-            <input
-                type="text"
-                id="searchInput"
-                placeholder="🔍 Search bikes..."
-            >
+            <h1>Bike Collection</h1>
+
+            <p class="subtitle">
+                Browse all available bikes
+            </p>
+
+            <div class="search-container">
+
+                <input
+                    type="text"
+                    id="searchInput"
+                    placeholder="🔍 Search bikes..."
+                >
+
+            </div>
+
         </div>
+
+        <div id="bikeGrid" class="bike-grid">
+
+            <div class="loading">
+                Loading bikes...
+            </div>
+
+        </div>
+
     </div>
 
-    <div id="bikeGrid" class="bike-grid">
-        <div class="loading">Loading bikes...</div>
+
+    <!-- ============================= -->
+    <!-- FULLSCREEN IMAGE VIEWER -->
+    <!-- ============================= -->
+
+    <div id="imageViewer" class="image-viewer">
+
+        <img
+            id="fullImage"
+            src=""
+            alt=""
+        >
+
     </div>
 
-</div>
 
-<script>
-const owner = "CogBikeValue";
-const repo = "collection";
-const folder = "images";
+    <script>
 
-const api =
-    `https://api.github.com/repos/${owner}/${repo}/contents/${folder}`;
+        // =============================
+        // GITHUB SETTINGS
+        // =============================
 
-window.allBikeFiles = [];
+        const owner = "CogBikeValue";
+        const repo = "collection";
+        const folder = "images";
 
-async function loadBikes() {
-    try {
-        const response = await fetch(api);
+        const api =
+            `https://api.github.com/repos/${owner}/${repo}/contents/${folder}`;
 
-        if (!response.ok) {
-            throw new Error("Failed to fetch GitHub files");
+
+        // Store all bike files
+        window.allBikeFiles = [];
+
+
+        // =============================
+        // LOAD BIKES
+        // =============================
+
+        async function loadBikes() {
+
+            try {
+
+                const response = await fetch(api);
+
+                if (!response.ok) {
+                    throw new Error("Failed to fetch GitHub files");
+                }
+
+                const files = await response.json();
+
+
+                // Only allow image files
+                const imageFiles = files.filter(file =>
+                    /\.(png|jpg|jpeg|webp|gif)$/i.test(file.name)
+                );
+
+
+                // Sort alphabetically
+                imageFiles.sort((a, b) =>
+                    a.name.localeCompare(b.name)
+                );
+
+
+                // Save files globally
+                window.allBikeFiles = imageFiles;
+
+
+                // Display bikes
+                renderBikes(imageFiles);
+
+
+            } catch (err) {
+
+                document.getElementById("bikeGrid").innerHTML = `
+                    <div class="loading">
+                        Failed to load bikes.
+                    </div>
+                `;
+
+                console.error(err);
+
+            }
+
         }
 
-        const files = await response.json();
 
-        const imageFiles = files.filter(file =>
-            /\.(png|jpg|jpeg|webp|gif)$/i.test(file.name)
-        );
+        // =============================
+        // RENDER BIKES
+        // =============================
 
-        imageFiles.sort((a, b) =>
-            a.name.localeCompare(b.name)
-        );
+        function renderBikes(files) {
 
-        window.allBikeFiles = imageFiles;
+            const grid = document.getElementById("bikeGrid");
 
-        renderBikes(imageFiles);
+            grid.innerHTML = "";
 
-    } catch (err) {
 
-        document.getElementById("bikeGrid").innerHTML = `
-            <div class="loading">
-                Failed to load bikes.
-            </div>
-        `;
+            files.forEach(file => {
 
-        console.error(err);
-    }
-}
+                // Convert filename into display name
+                const displayName = file.name
+                    .replace(/\.[^/.]+$/, "")
+                    .replace(/[-_]/g, " ");
 
-function renderBikes(files) {
 
-    const grid = document.getElementById("bikeGrid");
+                // Create bike card
+                const card = document.createElement("div");
 
-    grid.innerHTML = "";
+                card.className = "bike-card";
 
-    files.forEach(file => {
 
-        const displayName = file.name
-            .replace(/\.[^/.]+$/, "")
-            .replace(/[-_]/g, " ");
+                // Card HTML
+                card.innerHTML = `
+                    <img
+                        src="${file.download_url}"
+                        alt="${displayName}"
+                    >
 
-        const card = document.createElement("div");
-        card.className = "bike-card";
+                    <div class="bike-name">
+                        ${displayName}
+                    </div>
+                `;
 
-        card.innerHTML = `
-    <img src="${file.download_url}" alt="${displayName}">
-    <div class="bike-name">${displayName}</div>
-`;
 
-const img = card.querySelector("img");
+                // Get image from card
+                const img = card.querySelector("img");
 
-img.addEventListener("click", (event) => {
-    event.stopPropagation();
 
-    const viewer = document.getElementById("imageViewer");
-    const fullImage = document.getElementById("fullImage");
+                // =============================
+                // OPEN FULLSCREEN IMAGE
+                // =============================
 
-    fullImage.src = img.src;
-    fullImage.alt = img.alt;
+                img.addEventListener("click", (event) => {
 
-    viewer.classList.add("active");
-});
+                    event.stopPropagation();
 
-grid.appendChild(card);
-    });
 
-	
-	
-    if (files.length === 0) {
-        grid.innerHTML = `
-            <div class="loading">
-                No bikes found.
-            </div>
-        `;
-    }
-}
+                    const viewer =
+                        document.getElementById("imageViewer");
 
-const imageViewer = document.getElementById("imageViewer");
+                    const fullImage =
+                        document.getElementById("fullImage");
 
-imageViewer.addEventListener("click", () => {
-    imageViewer.classList.remove("active");
-});
 
-document.addEventListener("DOMContentLoaded", () => {
+                    // Set fullscreen image
+                    fullImage.src = img.src;
+                    fullImage.alt = img.alt;
 
-    const searchInput = document.getElementById("searchInput");
 
-    searchInput.addEventListener("input", () => {
+                    // Show viewer
+                    viewer.classList.add("active");
 
-        const search = searchInput.value
-            .trim()
-            .toLowerCase();
+                });
 
-        const filtered = window.allBikeFiles.filter(file => {
 
-            const bikeName = file.name
-                .replace(/\.[^/.]+$/, "")
-                .toLowerCase();
+                // Add card to grid
+                grid.appendChild(card);
 
-            return bikeName.includes(search);
+            });
+
+
+            // =============================
+            // NO RESULTS
+            // =============================
+
+            if (files.length === 0) {
+
+                grid.innerHTML = `
+                    <div class="loading">
+                        No bikes found.
+                    </div>
+                `;
+
+            }
+
+        }
+
+
+        // =============================
+        // CLOSE FULLSCREEN VIEWER
+        // =============================
+
+        const imageViewer =
+            document.getElementById("imageViewer");
+
+
+        imageViewer.addEventListener("click", () => {
+
+            imageViewer.classList.remove("active");
+
         });
 
-        renderBikes(filtered);
-    });
 
-    loadBikes();
-});
-</script>
+        // =============================
+        // SEARCH
+        // =============================
+
+        document.addEventListener("DOMContentLoaded", () => {
+
+            const searchInput =
+                document.getElementById("searchInput");
+
+
+            searchInput.addEventListener("input", () => {
+
+                const search =
+                    searchInput.value
+                        .trim()
+                        .toLowerCase();
+
+
+                const filtered =
+                    window.allBikeFiles.filter(file => {
+
+                        const bikeName =
+                            file.name
+                                .replace(/\.[^/.]+$/, "")
+                                .toLowerCase();
+
+
+                        return bikeName.includes(search);
+
+                    });
+
+
+                renderBikes(filtered);
+
+            });
+
+
+            // Load bikes when page starts
+            loadBikes();
+
+        });
+
+    </script>
 
 </body>
+
 </html>
